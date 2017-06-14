@@ -9,6 +9,7 @@ from jinja2 import Environment, FileSystemLoader
 import m_orm
 from config import configs
 from coroweb import add_routes, add_static
+from handlers import COOKIE_NAME, cookie2user
 
 logging.basicConfig(level=logging.INFO)
 
@@ -19,6 +20,23 @@ async def logger_factory(app, handler):
         return await handler(request)
 
     return logger
+
+
+async def auth_factory(app, handler):
+    async def auth(request):
+        logging.info('check user: %s %s' % (request.method, request.path))
+        request.__user__ = None
+        cookie_str = request.cookies.get(COOKIE_NAME)
+        if cookie_str:
+            user = await cookie2user(cookie_str)
+            if user:
+                logging.info('set current user: %s' % user.email)
+                request.__user__ = user
+        # if request.path.startswith('/manage/') and (request.__user__ is None or not request.__user__.admin):
+        #     return web.HTTPFound('/signin')
+        return await handler(request)
+
+    return auth
 
 
 async def data_factory(app, handler):
@@ -59,6 +77,7 @@ async def response_factory(app, handler):
                 resp.content_type = 'application/json;charset=utf-8'
                 return resp
             else:
+                r['__user__'] = request.__user__
                 resp = web.Response(body=app['__templating__'].get_template(template).render(**r).encode('utf-8'))
                 resp.content_type = 'text/html;charset=utf-8'
                 return resp
@@ -115,7 +134,7 @@ async def init(loop):
     await m_orm.create_pool(loop=loop, host=configs.db.host, port=configs.db.port, user=configs.db.user,
                             password=configs.db.password, db=configs.db.database)
 
-    app = web.Application(loop=loop, middlewares=[logger_factory, response_factory])
+    app = web.Application(loop=loop, middlewares=[logger_factory, auth_factory, response_factory])
     init_jinja2(app, filters=dict(datetime=datetime_filter))
     add_routes(app, 'handlers')
     add_static(app)

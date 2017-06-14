@@ -47,6 +47,7 @@
         <div class="uk-navbar-flip">
             <ul class="uk-navbar-nav">
                 {% if __user__ %}
+                <li><a href="/manage/blogs/create"><i class="uk-icon-edit"></i> 新建日志</a></li>
                 <li class="uk-parent" data-uk-dropdown>
                     <a href="#0"><i class="uk-icon-user"></i> {{ __user__.name }}</a>
                     <div class="uk-dropdown uk-dropdown-navbar">
@@ -84,7 +85,8 @@
             </p>
             <p>Powered by <a href="#">Awesome Python Webapp</a>. Copyright &copy; 2014. [<a
                     href="/manage/" target="_blank">Manage</a>]</p>
-            <p><a href="http://weiqianghu.github.io/" target="_blank">http://weiqianghu.github.io/</a>. All rights reserved.</p>
+            <p><a href="http://weiqianghu.github.io/" target="_blank">http://weiqianghu.github.io/</a>. All rights
+                reserved.</p>
             <a target="_blank" href="http://www.w3.org/TR/html5/"><i class="uk-icon-html5"
                                                                      style="font-size:64px; color: #444;"></i></a>
         </div>
