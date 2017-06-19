@@ -32,8 +32,8 @@ async def auth_factory(app, handler):
             if user:
                 logging.info('set current user: %s' % user.email)
                 request.__user__ = user
-        # if request.path.startswith('/manage/') and (request.__user__ is None or not request.__user__.admin):
-        #     return web.HTTPFound('/signin')
+        if request.path.startswith('/manage/') and (request.__user__ is None or not request.__user__.admin):
+            return web.HTTPFound('/signin')
         return await handler(request)
 
     return auth
@@ -138,8 +138,8 @@ async def init(loop):
     init_jinja2(app, filters=dict(datetime=datetime_filter))
     add_routes(app, 'handlers')
     add_static(app)
-    srv = await loop.create_server(app.make_handler(), '127.0.0.1', '8088')
-    logging.info('server started at http://127.0.0.1:8088...')
+    srv = await loop.create_server(app.make_handler(), '127.0.0.1', '8080')
+    logging.info('server started at http://127.0.0.1:8080...')
     return srv
 
 
